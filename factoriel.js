@@ -1,8 +1,12 @@
-const [nb] = process.argv.slice(2);
+let [nb] = process.argv.slice(2);
 
-let result = 1;
-for (let i = 1; i < Number(nb) + 1; i++) {
-  result = i * result;
+nb = Number(nb)
+
+function factoriel(number) {
+  if (number === 0) {
+    return 1;
+  }
+  return number * factoriel(number - 1);
 }
 
-console.log(result);
+console.log(factoriel(nb));
