@@ -1,28 +1,50 @@
 const [nb] = process.argv.slice(2);
 
+let fck = false;
+
 function numToArr(n) {
   return Array.from(String(n)).map((s) => Number(s));
 }
 
-function multiplyToAdditionArr(n1, n2) {
-  const sortedNumbers = [n1, n2].sort();
-  const little = sortedNumbers[0];
-  const big = numToArr(sortedNumbers[1]);
+function sortNumberStrings(n1, n2) {
+  if (n1.length !== n2.length) {
+    big = n1.length > n2.length ? n1 : n2;
+    little = n1.length > n2.length ? n2 : n1;
+  } else {
+    const sortedNumbers = sortNumbers([Number(n1), Number(n2)]);
+    big = sortedNumbers[1];
+    little = sortedNumbers[0];
+  }
+  return [big, little];
+}
 
-  let sumArr = [];
+function multiplyToAdditionArr(n1, n2) {
+  let [big, little] = sortNumberStrings(n1, n2);
+  big = numToArr(big);
+  if (fck) {
+    console.log("multiply", { n1, n2 });
+  }
+  let additionArr = [];
   for (let i = 0; i < big.length; i++) {
     const bigDigit = big[big.length - (i + 1)];
 
-    let sumStr = String(bigDigit * little);
+    let additionStr = String(bigDigit * little);
     // Ajout des zéros
     for (const _ of Array(i)) {
-      sumStr += "0";
+      additionStr += "0";
     }
 
-    sumArr.push(sumStr);
+    if (Number(additionStr) === 0) {
+      additionStr = "0";
+    }
+    additionArr.push(additionStr);
   }
 
-  return sumArr;
+  return additionArr;
+}
+
+function sortNumbers(numbers) {
+  return numbers.sort((a, b) => a - b);
 }
 
 function additionToStr(n1, n2) {
@@ -40,40 +62,75 @@ function additionToStr(n1, n2) {
   }
 
   let additionedArr = [];
-  const sortedNumbers = [n1, n2].sort();
-  const little = numToArr(sortedNumbers[0]);
-  const big = numToArr(sortedNumbers[1]);
-  for (let i = 0; i < big.length; i++) {
-    const littleNumber = little[little.length - (i + 1)] || 0;
-    additionedArr.unshift(applyCarry(big[big.length - (i + 1)] + littleNumber));
+
+  // Determine big & little
+  const [big, little] = sortNumberStrings(n1, n2);
+  const bigArr = numToArr(big);
+  const littleArr = numToArr(little);
+
+  for (let i = 0; i < bigArr.length; i++) {
+    const littleDigit = littleArr[littleArr.length - (i + 1)] || 0;
+    const bigDigit = bigArr[bigArr.length - (i + 1)] || 0;
+    const sumOfDigit = bigDigit + littleDigit;
+    additionedArr.unshift(applyCarry(sumOfDigit));
+  }
+
+  if (carry) {
+    additionedArr.unshift(carry);
   }
 
   return additionedArr.join("");
 }
 
-//console.log(additionToStr("126", "1680"));
-
-// console.log(multiplyToAdditionArr(132, 213), 132 * 213);
-// console.log(multiplyToAdditionArr(213, 5), 5 * 213);
-// console.log(multiplyToAdditionArr(5444, 213), 5444 * 213);
-// console.log(multiplyToAdditionArr(312132211412, 4332423), 312132211412 * 4332423);
-// console.log(multiplyToAdditionArr(99999, 999), 99999 * 999);
-// console.log(multiplyToAdditionArr(12345, 678), 12345 * 678);
-
-function rec(n) {
-  let allAdditionArr = [];
-  let additionArr;
-  for (let i = 1; i < Number(n) + 1; i += 2) {
-    const number = i;
-    const nextNumber = (i || 0) + 1;
-    additionArr = multiplyToAdditionArr(number, nextNumber);
-    let [a1, a2] = additionArr;
-    a2 = a2 === undefined ? "0" : a2;
-    const additionedStr = additionToStr(a1, a2)
-    allAdditionArr.push(additionedStr);
-    console.log({ multiply: `${number} * ${nextNumber}`, additionedStr });
+function rec(arr) {
+  let toMultiplyArr = [];
+  if(fck){
+    console.log({arrLength: arr.length})
   }
-  return allAdditionArr
+  for (let i = 0; i < arr.length; i += 2) {
+    const number = arr[i];
+    let nextNumber = arr[i + 1];
+    if (nextNumber === undefined) {
+      toMultiplyArr.push(number);
+      continue;
+    }
+
+    const additionArr = multiplyToAdditionArr(number, nextNumber);
+    const additionedStr = additionArr.reduce((acc, val) => {
+      return additionToStr(acc, val);
+    }, 0);
+    const additioned = additionArr.reduce((acc, val) => acc + Number(val), 0);
+    if (Number(additionedStr) !== additioned) {
+      fck = true;
+      console.log({
+        multiplication: `${number} * ${nextNumber}`,
+        additionArr,
+        additionedStr,
+        additioned,
+      });
+    }
+    toMultiplyArr.push(additionedStr);
+  }
+
+  // debug
+  if (fck) {
+    console.log({ toMultiplyArr });
+  }
+
+  if (toMultiplyArr.length === 1) {
+    const str = toMultiplyArr[0];
+    const goodStr = "1,405,006,117,752,879,898,543,142,606,244,511,569,936,384,000,000,000"
+      .split(",")
+      .join("");
+    return {
+      number: Number(str),
+      str,
+      isEqual: str === goodStr,
+      goodNumber: 1.4050061177528798e+51,
+      goodStr,
+    };
+  }
+  return rec(toMultiplyArr);
 }
 
 function facto(n) {
@@ -81,7 +138,7 @@ function facto(n) {
   for (let i = 1; i < Number(n) + 1; i++) {
     numbersToMultiply.push(i);
   }
-  return rec(n)
+  return rec(numbersToMultiply.map((n) => String(n)));
 }
 
 console.log(facto(nb));
