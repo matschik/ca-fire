@@ -112,7 +112,7 @@ function multiplication(arr) {
   if (toMultiplyArr.length === 1) {
     return toMultiplyArr[0];
   }
-  return rec(toMultiplyArr);
+  return multiplication(toMultiplyArr);
 }
 
 function factoriel(n) {
