@@ -92,7 +92,7 @@ function additionToStr(n1, n2) {
   return additionedArr.join("");
 }
 
-function rec(arr) {
+function multiplication(arr) {
   let toMultiplyArr = [];
   for (let i = 0; i < arr.length; i += 2) {
     const number = arr[i];
@@ -115,12 +115,16 @@ function rec(arr) {
   return rec(toMultiplyArr);
 }
 
-function facto(n) {
+function factoriel(n) {
+  n = Number(n);
+  if (n === 0) {
+    return "1";
+  }
   const numbersToMultiply = [];
-  for (let i = 1; i < Number(n) + 1; i++) {
+  for (let i = 1; i < n + 1; i++) {
     numbersToMultiply.push(i);
   }
-  return rec(numbersToMultiply.map((n) => String(n)));
+  return multiplication(numbersToMultiply.map((n) => String(n)));
 }
 
-console.log(facto(nb));
+console.log(factoriel(nb));
