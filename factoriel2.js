@@ -121,8 +121,8 @@ function factoriel(n) {
     return "1";
   }
   const numbersToMultiply = [];
-  for (let i = 1; i < n + 1; i++) {
-    numbersToMultiply.push(i);
+  for (let i = 0; i < n; i++) {
+    numbersToMultiply.push(i + 1);
   }
   return multiplication(numbersToMultiply.map((n) => String(n)));
 }
